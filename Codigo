@@ -1,0 +1,91 @@
+package Utilidad;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class Main {
+
+	public static void main(String[] args) {
+
+		int nombre = 1;
+		double apellidoPaterno = 0;
+		float apellidoMaterno = 0f;
+		short edad = 0;
+	    String estatus = "";
+		
+
+		int filter = 0;
+		Map<Integer, String> mapa = new HashMap<Integer, String>();
+		mapa = createMap("Nombre", "ApellidoPaterno", "ApellidoMaterno", "Edad","Estatus","Nombre", "ApellidoPaterno", "ApellidoMaterno", "Edad","Estatus");
+		
+		filter = resolveFilter(nombre, apellidoPaterno, apellidoMaterno, edad,estatus,nombre, apellidoPaterno, apellidoMaterno, edad,estatus);
+		System.out.println(mapa.get(filter));
+
+	}
+
+	public static int resolveFilter(Object... datos) {
+		
+		int resul = 0;
+
+		for (int i = 0; i < datos.length; i++) {
+
+			if (datos[i] != null) {
+
+				resul |= dataTest(datos[i].getClass().getSimpleName(), i, datos[i]);
+
+			}
+
+		}
+
+		return resul;
+	}
+
+	public static int dataTest(String tipo, int posicion, Object dato) {
+		int resul = 0;
+		int pow = (int) Math.pow( 2,  posicion);
+
+		if (tipo.equals("String") || tipo.equals("Character")) {
+
+			resul |= dato.toString().isEmpty() ? 0 : pow;
+
+		} else if (tipo.equals("Integer") || tipo.equals("Byte") || tipo.equals("Short") || tipo.equals("Long")
+				|| tipo.equals("Float") || tipo.equals("Double")) {
+
+			resul |= Double.parseDouble(dato.toString()) > 0 ? pow : 0;
+
+		}
+
+		return resul;
+	}
+
+	public static Map<Integer, String> createMap(String... filters) {
+		Map<Integer, String> mapaFilters = new HashMap<Integer, String>();
+		Map<Integer, String> mapaBinary = new HashMap<Integer, String>();
+		mapaFilters.put(0, "QueryByNone");
+		for (int i = 0; i < filters.length; i++) {
+			mapaBinary.put((int) Math.pow( 2, i), filters[i]);
+		}
+
+		int maxFilters = (int) Math.pow(2, filters.length) - 1;
+		for (int k = 0; k < maxFilters; k++) {
+			String binary = Integer.toBinaryString(k + 1), query = "QueryBy";
+			char[] bits = binary.toCharArray();
+			int j = 0;
+
+			for (int i = bits.length; i > 0; i--) {
+
+				if (bits[i-1] == '1') {
+					query += mapaBinary.get((int) Math.pow(2, (j)));
+					if(i!=1) {
+						query +="And";
+					}
+				}
+				j++;
+			}
+			mapaFilters.put(k + 1, query);
+		}
+
+		return mapaFilters;
+	};
+
+}
